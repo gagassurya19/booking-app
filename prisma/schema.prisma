@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Building {
+  building_id Int        @id @default(autoincrement())
+  name        String     @db.VarChar(100)
+  location    String     @db.VarChar(255)
+  description String?    @db.Text
+  price       Decimal    @db.Decimal(10, 2)
+  capacity    Int
+  created_at  DateTime?  @default(now()) @db.Timestamp(0)
+  Bookings    Bookings[]
+}
+
+model Admins {
+  admin_id   Int         @id @default(autoincrement())
+  name       String      @db.VarChar(100)
+  email      String      @unique(map: "email") @db.VarChar(100)
+  password   String      @db.VarChar(255)
+  role       Admins_role
+  created_at DateTime?   @default(now()) @db.Timestamp(0)
+  Approvals  Approvals[]
+}
+
+model Approvals {
+  approval_id   Int              @id @default(autoincrement())
+  booking_id    Int
+  admin_id      Int
+  status        Approvals_status
+  approval_date DateTime?        @default(now()) @db.Timestamp(0)
+  notes         String?          @db.Text
+  Bookings      Bookings         @relation(fields: [booking_id], references: [booking_id], onDelete: Cascade, onUpdate: NoAction, map: "Approvals_ibfk_1")
+  Admins        Admins           @relation(fields: [admin_id], references: [admin_id], onDelete: Cascade, onUpdate: NoAction, map: "Approvals_ibfk_2")
+
+  @@index([admin_id], map: "admin_id")
+  @@index([booking_id], map: "booking_id")
+}
+
+model Booking_Status_History {
+  status_history_id Int                               @id @default(autoincrement())
+  booking_id        Int
+  status            Booking_Status_History_status
+  changed_by        Booking_Status_History_changed_by
+  change_date       DateTime?                         @default(now()) @db.Timestamp(0)
+  notes             String?                           @db.Text
+  Bookings          Bookings                          @relation(fields: [booking_id], references: [booking_id], onDelete: Cascade, onUpdate: NoAction, map: "Booking_Status_History_ibfk_1")
+
+  @@index([booking_id], map: "booking_id")
+}
+
+model Bookings {
+  booking_id             Int                      @id @default(autoincrement())
+  user_id                Int
+  building_id            Int
+  booking_date           DateTime                 @db.Date
+  start_time             DateTime                 @db.Time(0)
+  end_time               DateTime                 @db.Time(0)
+  total_price            Decimal                  @db.Decimal(10, 2)
+  status                 Bookings_status
+  created_at             DateTime?                @default(now()) @db.Timestamp(0)
+  Approvals              Approvals[]
+  Booking_Status_History Booking_Status_History[]
+  Users                  Users                    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "Bookings_ibfk_1")
+  Building               Building                 @relation(fields: [building_id], references: [building_id], onDelete: Cascade, onUpdate: NoAction, map: "Bookings_ibfk_2")
+  Payments               Payments[]
+  Reviews                Reviews[]
+
+  @@index([building_id], map: "building_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Payments {
+  payment_id     Int                     @id @default(autoincrement())
+  booking_id     Int
+  payment_date   DateTime                @db.Date
+  amount         Decimal                 @db.Decimal(10, 2)
+  payment_method Payments_payment_method
+  payment_status Payments_payment_status
+  created_at     DateTime?               @default(now()) @db.Timestamp(0)
+  Bookings       Bookings                @relation(fields: [booking_id], references: [booking_id], onDelete: Cascade, onUpdate: NoAction, map: "Payments_ibfk_1")
+
+  @@index([booking_id], map: "booking_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Reviews {
+  review_id  Int       @id @default(autoincrement())
+  booking_id Int
+  user_id    Int
+  rating     Int?
+  review     String?   @db.Text
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  Bookings   Bookings  @relation(fields: [booking_id], references: [booking_id], onDelete: Cascade, onUpdate: NoAction, map: "Reviews_ibfk_1")
+  Users      Users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "Reviews_ibfk_2")
+
+  @@index([booking_id], map: "booking_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Users {
+  user_id      Int        @id @default(autoincrement())
+  name         String     @db.VarChar(100)
+  email        String     @unique(map: "email") @db.VarChar(100)
+  phone_number String?    @db.VarChar(15)
+  password     String     @db.VarChar(255)
+  created_at   DateTime?  @default(now()) @db.Timestamp(0)
+  Bookings     Bookings[]
+  Reviews      Reviews[]
+}
+
+enum Booking_Status_History_status {
+  pending
+  approved
+  rejected
+  cancelled
+  completed
+}
+
+enum Booking_Status_History_changed_by {
+  user
+  admin
+  system
+}
+
+enum Approvals_status {
+  approved
+  rejected
+}
+
+enum Admins_role {
+  admin
+  superadmin
+}
+
+enum Payments_payment_method {
+  credit_card
+  bank_transfer
+  paypal
+  cash
+}
+
+enum Payments_payment_status {
+  pending
+  completed
+  failed
+}
+
+enum Bookings_status {
+  pending
+  approved
+  rejected
+  cancelled
+  completed
+}
