@@ -98,7 +98,9 @@ export default function FeaturedVenues() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full text-lg">Book Now</Button>
+                    <Button className="w-full text-lg" asChild>
+                      <Link href={`/venues/${building.id}`}>Book Now</Link>
+                    </Button>
                   </CardFooter>
                 </Card>
               </motion.div>

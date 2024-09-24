@@ -45,7 +45,7 @@ const sections = [
 
 const Footer = () => {
     return (
-        <section className="py-32">
+        <section className="py-32 bg-white">
             <div className="container mx-auto">
                 <footer className='mx-10'>
                     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
