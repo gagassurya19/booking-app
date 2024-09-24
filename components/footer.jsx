@@ -75,7 +75,7 @@ const Footer = () => {
                             </div>
                         </div>
                     </div>
-                    <Separator className="my-14" />
+                    <Separator className="my-14 border-t border-gray-200" />
                     <div className="grid gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {sections.map((section, sectionIdx) => (
                             <div key={sectionIdx}>
@@ -154,7 +154,7 @@ const Footer = () => {
                             </ul>
                         </div>
                     </div>
-                    <Separator className="my-14" />
+                    <Separator className="my-14 border-t border-gray-200" />
                     <p className="text-sm text-muted-foreground">
                         © 2024 EventSpace. All rights reserved.
                     </p>
